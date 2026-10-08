@@ -1,17 +1,24 @@
 
 import { useState } from 'react'
+import { cadastrarProduto } from './api'
 
 function Produtos({ produtos, setProdutos }) {
   const [nome, setNome] = useState('')
   const [unidade, setUnidade] = useState('')
   const [quantidade, setQuantidade] = useState('')
-  function cadastrarProdutos() {
-    const novoProduto = {
-      nome: nome,
-      unidade: unidade,
-      quantidade: quantidade,
+  const [erro, setErro] = useState('')
+
+  async function cadastrarProdutos() {
+    try {
+      const novoProduto = await cadastrarProduto({ nome, unidade, quantidade })
+      setProdutos([...produtos, novoProduto])
+      setNome('')
+      setUnidade('')
+      setQuantidade('')
+      setErro('')
+    } catch (erro) {
+      setErro(erro.message)
     }
-    setProdutos([...produtos, novoProduto])
   }
   return (
     <div className="produtos">
@@ -31,8 +38,8 @@ function Produtos({ produtos, setProdutos }) {
             </thead>
 
             <tbody>
-              {produtos.map((produto, indice) => (
-                <tr key={indice}>
+              {produtos.map((produto) => (
+                <tr key={produto.id}>
                   <td>{produto.nome}</td>
                   <td>{produto.unidade}</td>
                   <td>{produto.quantidade}</td>
@@ -63,6 +70,8 @@ function Produtos({ produtos, setProdutos }) {
           value={quantidade}
           onChange={(evento) => setQuantidade(evento.target.value)}
         />
+
+        {erro && <p>{erro}</p>}
 
         <button onClick={cadastrarProdutos}>
           Cadastrar produto
